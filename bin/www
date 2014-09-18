@@ -8,6 +8,43 @@ var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
 });
 
+
+//redis
+var redis = require("redis"),
+        redis_pub = redis.createClient(), //redis channel publisher for testing purposes, this will simply publish the data coming on('fromclient')
+        redis_sub = redis.createClient(), //redis subscriber -- this is the part we are most interested in for this poc - sub clients will be popping msgs from channels and delivering them to the ui.)
+        msg_count = 0;
+ 
+ redis_pub.on("error", function (err) {
+     console.log("Error " + err);
+ });
+
+
+ redis_sub.on("error", function (err) {
+     console.log("Error " + err);
+ });
+
+     redis_sub.on("subscribe", function (channel, count) {
+        redis_pub.publish("subs", "subscription to:" + channel);
+        //I am sending a message.");
+        //redis_pub.publish("a nice channel", "I am sending a second message.");
+        //redis_pub.publish("a nice channel", "I am sending my last message.");
+    });
+/*
+    redis_sub.on("message", function (channel, message) {
+        console.log("client1 channel " + channel + ": " + message);
+        msg_count += 1;
+        if (msg_count === 3) {
+            redisclient1.unsubscribe();
+            redisclient1.end();
+            redisclient2.end();
+        }
+    });
+
+    redisclient1.incr("did a thing");
+    redisclient1.subscribe("a nice channel");
+*/
+//socket.io
 var io = require('socket.io').listen(server);
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
@@ -15,16 +52,27 @@ server.listen(app.get('port'), function(){
 
 io.sockets.on('connection', function (socket) {
   //socket.emit('fromserver', { results: 'hello world' });
-  
+  redis_sub.subscribe("fromclient");
   socket.on('fromclient', function (data) {
 
     console.log("Data sent from client:" + JSON.stringify(data.results));
-    socket.emit("fromserver", { "results":data.results });
-   
-   });
+    redis_pub.publish("fromclient",JSON.stringify(data));
+
+
+	redis_sub.on('message', function(channel,message) {
+		console.log("Sending Results:" + JSON.parse(message).results + " - from server to client");
+		socket.emit("fromserver", { "results": JSON.parse(message).results });
+	});
+    
+   	
+  });
   socket.on('disconnect',function() {
   	console.log("Client disconnected");
-  })
+  	redis_sub.unsubscribe();
+  	redis_sub.end();
+	redis_pub.end();
+  	
+  });
 
 
 });
