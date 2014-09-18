@@ -14,10 +14,17 @@ server.listen(app.get('port'), function(){
 });
 
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-    socket.emit('news', { newsitem: "Extra Extra Read All About it"})
-  });
+  //socket.emit('fromserver', { results: 'hello world' });
   
+  socket.on('fromclient', function (data) {
+
+    console.log("Data sent from client:" + JSON.stringify(data.results));
+    socket.emit("fromserver", { "results":data.results });
+   
+   });
+  socket.on('disconnect',function() {
+  	console.log("Client disconnected");
+  })
+
+
 });
