@@ -14,44 +14,35 @@
     </style>
   </head>
   <body>
+
+    <h1>Socket.io + Redis pubsub poc.</h1>
+    <br>
+    <p>Enter a message below to test. (helpful to have redis-cli open with 'monitor' running)</p>
+    <br>
+    <p>List Stuff Here</p>
     <ul id="messages"></ul>
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
-
-
-
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
     </script>
-
-      <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js" charset="utf-8"></script>
-      <script type="text/javascript">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js" charset="utf-8"></script>
+    <script type="text/javascript">
         
       socket.on('fromserver', function (data) {
 
-            $('#messages').append($('<li>').text(data.results));
+         $('#messages').append($('<li>').text(data.results));
             
       });
-      $('form').submit(function(){
-        socket.emit('fromclient', {"results": $('#m').val()});
-        $('#m').val('');
-        return false;
-      });
-/*
-      function sendm() {
-        var msg=$("#m").val();
-        
-      
-        $("#m").val('');
-        alert(msg);
-        socket.emit("fromclient", {"results": msg});
 
-        //return false;
-      }
- */
+      $('form').submit(function(){
+          socket.emit('fromclient', {"results": $('#m').val()});
+          $('#m').val('');
+          return false;
+      });
+    
     </script>
-      </script>
   </body>
 </html>
