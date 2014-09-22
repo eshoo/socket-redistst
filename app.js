@@ -6,7 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var app = express();
-var TTYrelay=require('./TTYrelay');
 var Log=require('./log');
 var users = require('./routes/users');
 var socketio=require('socket.io');
@@ -26,10 +25,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
-console.log(TTYrelay.socketio);
-console.log(Log.socketio);
-console.log(app.socketio);
-TTYrelay.socketio=app.socketio;
 Log.socketio=app.socketio;
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
