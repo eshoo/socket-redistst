@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+  - "0.10"
+deploy:
+  provider: heroku
+  app: sockpoc
+  api_key: "c6ba4768-e5eb-4005-859b-c8e62a0fe842"
+  strategy: git

@@ -2,69 +2,16 @@
 var debug = require('debug')('redisio');
 var app = require('../app');
 
+
+var Log = require('../log');
+
 app.set('port', process.env.PORT || 3020);
 
 var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
 });
 
-//redis
-var redis = require("redis");
-var redis_sub;
-var redis_pub;
-
-     
- 
+app.server=server;
 
 
-//socket.io
-var io = require('socket.io').listen(server);
-
-//server
-server.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
-
-//socket connection established
-io.sockets.on('connection', function (socket) {
-   redis_pub = redis.createClient(); //redis channel publisher for testing purposes, this will simply publish the data coming on('fromclient')
-   redis_sub = redis.createClient(); //redis subscriber -- this is the part we are most interested in for this poc - sub clients will be popping msgs from channels and delivering them to the ui.)
-  //subscribe to channel
-  redis_sub.subscribe("fromclient");
-  // 'fromclient' is both the socket.io eventname and the redis channel name.
-  // the webui provides an input to send 'fromclient' messages to the listener
-  socket.on('fromclient', function (data) {
-    console.log("Data sent from client:" + JSON.stringify(data.results));
-    //the msg from the web client is then published to the 'fromclient' channel --this is only done to create a circle for the data to travel like WEBUI->socket.on('fromclient')->redis.publish-to('fromclient')->redis_sub.on('message')->socket.emit('fromserver')->WEBUI-display-message
-    redis_pub.publish("fromclient",JSON.stringify(data));
-  });
-
-
-
-  redis_sub.on('message', function(channel,message) {
-  	console.log("Sending Results:" + JSON.parse(message).results + " - from server to client");
-  	socket.emit("fromserver", { "results": JSON.parse(message).results });
-  });
-
-  redis_pub.on("error", function (err) {
-    console.log("Error " + err);
-  });
-
-  redis_sub.on("error", function (err) {
-    console.log("Error " + err);
-  });
-
-  redis_sub.on("subscribe", function (channel, count) {
-    redis_pub.publish("subs", "subscription to:" + channel);
-  });
-
-  socket.on('disconnect',function() {
-    console.log("Client disconnected");
-    redis_sub.unsubscribe();
-    redis_sub.end();
-    redis_pub.end();
-  });
-});
-
-// flow: WEBUI.submit()->socket.on('fromclient')->redis.publish-to('fromclient')->redis_sub.on('message')->socket.emit('fromserver')->WEBUI-display-message
-
+Log.initialize(app);

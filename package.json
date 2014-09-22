@@ -1,6 +1,6 @@
 {
   "name": "redisio",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -17,6 +17,11 @@
     "redis": "~0.8.4",
     "serve-favicon": "~2.1.3",
     "socket.io": "^1.0.6",
-    "sockjs": "~0.3.7"
+    "sockjs": "~0.3.7",
+    "split": "*",
+    "through": "*",
+    "async": "*",
+    "ttyrec": "0.0.27",
+    "ansi_up": "~1.1.2"
   }
 }

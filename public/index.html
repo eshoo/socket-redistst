@@ -19,6 +19,11 @@
     <br>
     <p>Enter a message below to test. (helpful to have redis-cli open with 'monitor' running)</p>
     <br>
+    <br>
+    <p>Test playback of a ttyrecording: 
+      <a href="javascript:triggerplayback();" target="_blank">Trigger playback</a>
+    </p>
+
     <div style="width: 90%; height: 85%; overflow-y: scroll; overflow-x: auto; margin-bottom:20px;  padding-bottom:10%; padding: 20px; display:block;">
        <p>List Stuff Here</p>
        <ul id="messages"></ul>
@@ -32,15 +37,20 @@
     </script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js" charset="utf-8"></script>
     <script type="text/javascript">
-        
+      function triggerplayback() {
+        alert("Triggering playback");
+        socket.emit("ttyplay", "Should pass a channelname,eventname and/or a filename using this");
+        return false;
+      }
+
       socket.on('fromserver', function (data) {
 
-         $('#messages').append($('<li>').text(data.results));
+         $('#messages').append($('<li>').html(data));
             
       });
 
       $('form').submit(function(){
-          socket.emit('fromclient', {"results": $('#m').val()});
+          socket.emit('fromclient', $('#m').val());
           $('#m').val('');
           return false;
       });
